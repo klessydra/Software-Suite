@@ -7,8 +7,9 @@ include_directories(
 )
 
 add_subdirectory(convolution_tests)
-add_subdirectory(instruction_tests)
+add_subdirectory(vcu_instruction_tests)
 add_subdirectory(fft_test)
 add_subdirectory(Kmeans)
 add_subdirectory(Matmul)
 add_subdirectory(composite_test)
+add_subdirectory(misc)

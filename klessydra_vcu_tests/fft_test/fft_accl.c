@@ -131,7 +131,7 @@ int test_check() {
 
 #define NINPUTS 256
 
-#define Debug_en 0
+#define Debug_en 1
 
 #ifdef Debug_en
 
@@ -756,7 +756,7 @@ void fft(int *data, int len) {
 #if Debug_en == 1
 void debug_fft(int hart_ID, int* data_R_ptr, int* data_I_ptr) {
 
-  if (hart_ID == 1){
+  if (hart_ID == 0){
     int errors = 0;
     for (int i=0; i<256; i++) {
       if (data_R_ptr[i] != ref_res[2*i]) {
@@ -937,7 +937,7 @@ if (Klessydra_get_coreID() == j) {
     final_perf[k][j]=ptr_perf[k];
   }
 
-  if (Klessydra_get_coreID() == 1) {
+  if (Klessydra_get_coreID() == 0) {
     #if KLESSYDRA_PERF == 1 || RISCY_PERF == 1
     for (int i=0; i<3; i++) {
       printf(" Cycle Count = %d \n Instruction Count = %d \n Instruction wait = %d \n Load Count = %d \n Store Count = %d \n Unconditional Jump Count = %d \n Branch Count = %d \n Taken Count = %d \n \n", 

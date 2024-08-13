@@ -2,9 +2,9 @@
 ----------------------------------------------------------------------------------------------------
 Convolution test
 Multithreaded;
-Accelerator (DSP+spm) is ON;
-Replication of spm's and DSP Unit is ON;
-the Multithread is used with different thread working on 3 batches of rows of the same output matrix, 
+Accelerator VCU enabled;
+Replication of VCU and SPM Unit is ON;
+the Multithreaing is used with different threads working on 3 batches of rows of the same output matrix, 
 so in this approach each thread has a REGION of the output matrix to work on
 ----------------------------------------------------------------------------------------------------
 */
@@ -18,7 +18,7 @@ so in this approach each thread has a REGION of the output matrix to work on
 //#define PRINT_NUM_CYCLES 1 // to print the cycle count
 #endif
 
-//#define PRINT_DEBUG 1 //to check if matrix is correct
+#define PRINT_DEBUG 1 //to check if matrix is correct
 //don't change these :P
 // // //#define MATRIX_CHECK_THREAD 0
 //#define MATRIX_CHECK 0 //in the de-coupled method, but with dedicated_SPMU, this can be done
@@ -97,7 +97,7 @@ int main(){
 
 	print_global_k =0;
 	print_global_id=0;
-	print_global_dbg=0;;
+	print_global_dbg=0;
 	int squares[A_ORDER*A_ORDER]={0};
 	warn[0]=2;
 	warn[1]=2;
@@ -107,7 +107,7 @@ int main(){
     matB[i]=(i+1)<<8;
   }
 	sign=1;
-	for(int i =0; i<A_ORDER*A_ORDER; i++){
+	for(int i =0; i<A_ORDER*A_ORDER; i++) {
     matA0[i]=(1000*sign*(i+1))<<8;
 		matA1[i]=(20*sign*(i+1))<<8;
 		matA2[i]=(3*sign*(i+1))<<8;
@@ -134,7 +134,7 @@ int main(){
   __asm__("csrrw zero, mcycle, zero");
 
 	CSR_MVSIZE(SPM_MAX*SPM_MAX*sizeof(int));
-	kbcast((void*)0x10000000,(void*)azzero);
+	kbcast((void*)spmaddrA,(void*)azzero);
 	kbcast((void*)spmaddrB,(void*)azzero);
 	kbcast((void*)spmaddrC,(void*)azzero);
 
@@ -313,6 +313,10 @@ int main(){
 				);
 				//------------------------------------------------------------------------------------------
 				for (int l=0; l<loop_index; l++) convolution2D_Scaling(A_ORDER, mat_second_A[0],(int*)matB, (int*)output_compare0);
+				printf("PRINTING SCALAR MAT\n\n");
+				matrix_print((int*)output_compare0, A_ORDER, 1);
+				printf("PRINTING VECTOR MAT\n\n");
+				matrix_print((int*)output_compare_s0, A_ORDER, 1);
 				// DISABLE COUNTING AND SAVE MCYCLE -------------------------------------------------------
 				__asm__("csrrw zero, 0x7A0, 0x00000000;"
 								"csrrw %[perf_mem], mcycle, zero;"
@@ -345,9 +349,9 @@ void convolution2D_Scaling(int size, int (*matrix)[size], int *kernel_tmp, int *
 	int kernel[9];
 	int conv2D_scaling_factor=8;
 	int conv2D_out_scal=5;
-	for(int i=0;i<9;i++){
+	for(int i=0;i<9;i++) {
     	kernel[i]=(kernel_tmp[i]>>conv2D_scaling_factor);
-    }
+  }
 	int i, j;
 	int pt=0;
 	///////////////////////////////////
@@ -356,12 +360,12 @@ void convolution2D_Scaling(int size, int (*matrix)[size], int *kernel_tmp, int *
 	for(i = 1; i < size-1 ; i++)
 	{
 		pt=i*size+j;
-		out[pt] +=	(((matrix[i-1][j-1]>>conv2D_scaling_factor) * kernel[0])>> conv2D_out_scal) +
-								(((matrix[i-1][j]	>>conv2D_scaling_factor)	* kernel[1])>> conv2D_out_scal) +
-								(((matrix[i][j-1]	>>conv2D_scaling_factor)	* kernel[3])>> conv2D_out_scal) +
-								(((matrix[i][j]	>>conv2D_scaling_factor)		* kernel[4])>> conv2D_out_scal) +
-								(((matrix[i+1][j-1]>>conv2D_scaling_factor) * kernel[6])>> conv2D_out_scal) +
-								(((matrix[i+1][j] >>conv2D_scaling_factor)	* kernel[7])>> conv2D_out_scal);
+		out[pt] +=	(((matrix[i-1][j-1]>>conv2D_scaling_factor) * kernel[0]) >> conv2D_out_scal) +
+								(((matrix[i-1][j]	>>conv2D_scaling_factor)	* kernel[1]) >> conv2D_out_scal) +
+								(((matrix[i][j-1]	>>conv2D_scaling_factor)	* kernel[3]) >> conv2D_out_scal) +
+								(((matrix[i][j]	>>conv2D_scaling_factor)		* kernel[4]) >> conv2D_out_scal) +
+								(((matrix[i+1][j-1]>>conv2D_scaling_factor) * kernel[6]) >> conv2D_out_scal) +
+								(((matrix[i+1][j] >>conv2D_scaling_factor)	* kernel[7]) >> conv2D_out_scal);
 	}
 	if(print){
 		printf("dopo kernel F\n");
@@ -547,7 +551,7 @@ void display_spm_matrix(int size_r,int size_c,void* pt_spm_mat)
   kmemstr((int*)pref_buff, (void*)(pt_spm_mat), (size_r*size_c)*sizeof(int));
 
   // int k=0,quad=0,temp=0;
-  for(int i=0; i<size_r; i++)
+  for(int i=0; i<1; i++)
   {
     for(int j=0; j<size_c; j++)
     {
@@ -561,7 +565,7 @@ void display_spm_matrix(int size_r,int size_c,void* pt_spm_mat)
 }
 void matrix_print(int* pt, int size, int mode)
 {
-	for(int i=0; i<size; i++)
+	for(int i=0; i<1; i++)
 	{
 		for(int j=0; j<size; j++)
 		{
