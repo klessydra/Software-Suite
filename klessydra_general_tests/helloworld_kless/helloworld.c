@@ -1,24 +1,14 @@
-// Copyright 2017 ETH Zurich and University of Bologna.
-// Copyright and related rights are licensed under the Solderpad Hardware
-// License, Version 0.51 (the “License”); you may not use this file except in
-// compliance with the License.  You may obtain a copy of the License at
-// http://solderpad.org/licenses/SHL-0.51. Unless required by applicable law
-// or agreed to in writing, software, hardware and materials distributed under
-// this License is distributed on an “AS IS” BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-
-
 #include <stdio.h>
 #include <functions.h>
 
 int main()
 {
-  __asm__("csrw 0x300, 0x8;" );// each thread enables it's own interrupt
+    Klessydra_En_Int(); // enable irqs
 
-  if (Klessydra_get_coreID() != 2)
-    printf("Hello World!!!!!\n");
-  else
-    __asm__("wfi");
-  return 0;
+    sync_barrier_thread_registration();
+    if (Klessydra_get_coreID() == 0) {
+      printf("Hello World!!!!!\n");
+    }
+    sync_barrier();
+    return 0;
 }
