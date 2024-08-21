@@ -1,3 +1,4 @@
+add_application(convolution_test convolution_test.c LABELS "klessydra_tests")
 add_subdirectory(convolution_test_single_spmu_subkernels_decoupled)
 add_subdirectory(convolution_test_single_spmu_subkernels_loosely_coupled)
 add_subdirectory(convolution_test_single_spmu_zeropadded_decoupled)
